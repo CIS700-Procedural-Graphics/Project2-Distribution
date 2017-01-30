@@ -94,7 +94,7 @@
 	
 	    // set skybox
 	    var loader = new THREE.CubeTextureLoader();
-	    var urlPrefix = '/images/skymap/';
+	    var urlPrefix = 'https://raw.githubusercontent.com/emily-vo/Project2-Toolbox-Functions/master/images/skymap/';
 	
 	    var skymap = new THREE.CubeTextureLoader().load([urlPrefix + 'px.jpg', urlPrefix + 'nx.jpg', urlPrefix + 'py.jpg', urlPrefix + 'ny.jpg', urlPrefix + 'pz.jpg', urlPrefix + 'nz.jpg']);
 	
