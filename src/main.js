@@ -71,7 +71,7 @@ function onLoad(framework) {
         feathers = [];
         var curve = new THREE.QuadraticBezierCurve3();
 
-        objLoader.load('/geo/feather.obj', function(obj) {
+        objLoader.load('https://raw.githubusercontent.com/CIS700-Procedural-Graphics/Project2-Toolbox-Functions/master/geo/feather.obj', function(obj) {
             // Add a simple curve
             var SUBDIVISIONS = guiVar.subdivisions;
             var SUBDIVMULT = guiVar.subdivisionsMult;
