@@ -141,7 +141,14 @@ export function layer4(featherMesh, l, numFeathersInlayer, pos_exponent) {
 	featherMesh.material.color.add(new THREE.Color(0, jitter(0, 0.5), 0));
 }
 
-export function updatePosition(featherMesh, i, numFeathersInLayer, position_exponent) {
+export function updateYPosition(featherMesh, i, numFeathersInLayer, curvatureAmount) {
+	var startYPos = -curvatureAmount;
+	var endYPos = 0;
+	var weight = i / numFeathersInLayer;
+	featherMesh.position.y = lerp(startYPos, endYPos, Math.pow(weight, 0.33));
+}
+
+export function updateZPosition(featherMesh, i, numFeathersInLayer, position_exponent) {
 	var startZPos = 0;
 	var endZPos = 16;
 	var weight = i / numFeathersInLayer;

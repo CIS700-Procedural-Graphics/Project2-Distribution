@@ -3,7 +3,7 @@
 
 const THREE = require('three'); // older modules are imported like this. You shouldn't have to worry about this much
 import Framework from './framework'
-import {layer1, layer2, layer3, layer4, updatePosition} from './toolbox_functions'
+import {layer1, layer2, layer3, layer4, updateYPosition, updateZPosition} from './toolbox_functions'
 
 var numFeathers; //set after loading in the feather obj during the callback function
 
@@ -13,26 +13,49 @@ var layer2Num = 100;
 var layer3Num = 150;
 var layer4Num = 25;
 
-function updatePositions(framework, exponent) {
+function updateYPositions(framework, curvatureAmount) {
 	for(var i = 0; i < layer1Num; i++) {
 		var currentFeather = framework.scene.getObjectByName("feather_" + i);
 		//console.log(currentFeather);
-		updatePosition(currentFeather, i, layer1Num, exponent);
+		updateYPosition(currentFeather, i, layer1Num, curvatureAmount);
 	}
 	
 	for(var j = 0; j < layer2Num; j++) {
 		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j));
-		updatePosition(currentFeather, j, layer2Num, exponent);
+		updateYPosition(currentFeather, j, layer2Num, curvatureAmount);
 	}
 	
 	for(var k = 0; k < layer3Num; k++) {
 		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j + k));
-		updatePosition(currentFeather, k, layer3Num, exponent);
+		updateYPosition(currentFeather, k, layer3Num, curvatureAmount);
 	}
 	
 	for(var l = 0; l < layer4Num; l++) {
 		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j + k + l));
-		updatePosition(currentFeather, l, layer4Num, exponent);
+		updateYPosition(currentFeather, l, layer4Num, curvatureAmount);
+	}
+}
+
+function updateZPositions(framework, exponent) {
+	for(var i = 0; i < layer1Num; i++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + i);
+		//console.log(currentFeather);
+		updateZPosition(currentFeather, i, layer1Num, exponent);
+	}
+	
+	for(var j = 0; j < layer2Num; j++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j));
+		updateZPosition(currentFeather, j, layer2Num, exponent);
+	}
+	
+	for(var k = 0; k < layer3Num; k++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j + k));
+		updateZPosition(currentFeather, k, layer3Num, exponent);
+	}
+	
+	for(var l = 0; l < layer4Num; l++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j + k + l));
+		updateZPosition(currentFeather, l, layer4Num, exponent);
 	}
 }
 
@@ -75,10 +98,10 @@ function onLoad(framework) {
     
     //create methods for each of these, have to iterate over each feather using
     //get object by name and start with the corresponding integer offset
-    var interpolationExponent = { value: 0.5 }; //This is NOT per layer. changes how the position of the feathers is interpolated, default to 2, as it is now. Have to alter every feather's position.
+    var interpolationExponent = { distribution: 0.5 }; //This is NOT per layer. changes how the position of the feathers is interpolated, default to 2, as it is now. Have to alter every feather's position.
     
     //this one is for all feathers at once
-    var curvature; //have all feathers uniformly scale up their y-axis position, which should be quadratically lerped. first 3 layers default 0 to 0, fourth has a lil offset.
+    var curvature = { curvature : 0 }; //have all feathers uniformly scale up their y-axis position, which should be quadratically lerped. first 3 layers default 0 to 0, fourth has a lil offset.
     
     var x_orientation, y_orientation, z_orientation; //This is per layer. rotate each individual feather by what ever amount
     
@@ -140,8 +163,12 @@ function onLoad(framework) {
         camera.updateProjectionMatrix();
     });
     
-    gui.add(interpolationExponent, 'value', 0.1, 5).onChange(function(newVal) {
-        updatePositions(framework, newVal);
+    gui.add(interpolationExponent, 'distribution', 0.1, 5).onChange(function(newVal) {
+        updateZPositions(framework, newVal);
+    });
+    
+    gui.add(curvature, 'curvature', 0, 50).onChange(function(newVal) {
+        updateYPositions(framework, newVal);
     });
 }
 
