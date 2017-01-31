@@ -193,27 +193,30 @@ function createFeathers(scene)
     if(feathers.children[i])
     {
       scene.remove(feathers.children[i]);
-      feathers.remove(feathers.children[i]);
+      // feathers.remove(feathers.children[i]);
     }
   }
 
-  var PathLayer1 = new THREE.Path(curve.getPoints(guiParameters.numberOfFeathers)); //50 is the numberOfFeathers initially
-  var splineGeom = PathLayer1.createPointsGeometry(guiParameters.numberOfFeathers);
+  PathLayer1 = new THREE.Path(curve.getPoints(guiParameters.numberOfFeathers)); //50 is the numberOfFeathers initially
+  splineGeom = PathLayer1.createPointsGeometry(guiParameters.numberOfFeathers);
 
   //add to feathers group
   for(var i=0; i<guiParameters.numberOfFeathers ;i++)
   {
-    featherMesh = new THREE.Mesh(featherGeo, feather_Material);
-    var position = splineGeom.vertices[i];
-    // var position = splineGeom.vertices[Math.round(i/0.38)];
-    featherMesh.position.set(position.x, position.y, 0);
-    featherMesh.scale.set(0.3, 0.3, 0.3);
-    featherMesh.scale.set(0.3, 0.3, 0.3);
-    var radianY = -90 * (Math.PI/180);
-    var radianZ = -90 * (Math.PI/180);
-    featherMesh.rotateY( radianY );
-    featherMesh.rotateZ( radianZ );
-    feathers.add(featherMesh);
+    if(feathers.children[i])
+    {
+      // featherMesh = new THREE.Mesh(featherGeo, feather_Material);
+      var position = splineGeom.vertices[i];
+      // var position = splineGeom.vertices[Math.round(i/0.38)];
+      feathers.children[i].position.set(position.x, position.y, 0);
+      feathers.children[i].scale.set(0.3, 0.3, 0.3);
+      feathers.children[i].scale.set(0.3, 0.3, 0.3);
+      var radianY = -90 * (Math.PI/180);
+      var radianZ = -90 * (Math.PI/180);
+      feathers.children[i].rotateY( radianY );
+      feathers.children[i].rotateZ( radianZ );
+      // feathers.add(featherMesh);
+    }
   }
 
   // dynamicLayers(scene);
