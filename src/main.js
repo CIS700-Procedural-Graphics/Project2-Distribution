@@ -211,10 +211,10 @@ function createFeathers(scene)
       feathers.children[i].position.set(position.x, position.y, 0);
       feathers.children[i].scale.set(0.3, 0.3, 0.3);
       feathers.children[i].scale.set(0.3, 0.3, 0.3);
-      var radianY = -90 * (Math.PI/180);
-      var radianZ = -90 * (Math.PI/180);
-      feathers.children[i].rotateY( radianY );
-      feathers.children[i].rotateZ( radianZ );
+      // var radianY = -90 * (Math.PI/180);
+      // var radianZ = -90 * (Math.PI/180);
+      // feathers.children[i].rotateY( radianY );
+      // feathers.children[i].rotateZ( radianZ );
       // feathers.add(featherMesh);
     }
   }
@@ -294,31 +294,34 @@ function changeGUI(framework)
   f2.add(guiParameters, 'featherDistribution', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.featherDistribution = newVal;
-    createFeathers(scene);
-    changeSpline();
+    // createFeathers(scene);
+    // changeSpline();
     featherDistribution();
-    orientationChanged();
-    featherSizeChanged();
+    createFeathers(scene);
+    // orientationChanged();
+    // featherSizeChanged();
   });
   f2.add(guiParameters, 'featherSize', 0.3, 2.0).onChange(function(newVal)
   {
     guiParameters.featherSize = newVal;
     featherSizeChanged();
+    // createFeathers(scene);
   });
   f2.add(guiParameters, 'featherOrientation', -1.5, 1.5).onChange(function(newVal)
   {
     guiParameters.featherOrientation = newVal;
     orientationChanged();
+    // createFeathers(scene);
   });
   f2.add(guiParameters, 'numberOfFeathers', 30, 200).onChange(function(newVal)
   {
     guiParameters.numberofFeathers = newVal;//3*newVal;
     // changeSpline();
-    changeSpline();
+    // changeSpline();
     createFeathers(scene);
-    featherDistribution();
-    orientationChanged();
-    featherSizeChanged();
+    // featherDistribution();
+    // orientationChanged();
+    // featherSizeChanged();
   });
 
   var f3 = gui.addFolder('Flapping');
@@ -362,38 +365,42 @@ function changeGUI(framework)
   f6.add(guiParameters, 'controlPoint2x', -1.0, 1.0).onChange(function(newVal)
   {
     guiParameters.controlPoint2x = newVal;
-    createFeathers(scene);
+
     changeSpline();
-    featherDistribution();
-    orientationChanged();
-    featherSizeChanged();
+    createFeathers(scene);
+    // featherDistribution();
+    // orientationChanged();
+    // featherSizeChanged();
   });
   f6.add(guiParameters, 'controlPoint2y', -1.0, 1.0).onChange(function(newVal)
   {
     guiParameters.controlPoint2y = newVal;
-    createFeathers(scene);
+    // createFeathers(scene);
     changeSpline();
-    featherDistribution();
-    orientationChanged();
-    featherSizeChanged();
+    createFeathers(scene);
+    // featherDistribution();
+    // orientationChanged();
+    // featherSizeChanged();
   });
   f6.add(guiParameters, 'controlPoint3x', -1.0, 1.0).onChange(function(newVal)
   {
     guiParameters.controlPoint3x = newVal;
-    createFeathers(scene);
+    // createFeathers(scene);
     changeSpline();
-    featherDistribution();
-    orientationChanged();
-    featherSizeChanged();
+    createFeathers(scene);
+    // featherDistribution();
+    // orientationChanged();
+    // featherSizeChanged();
   });
   f6.add(guiParameters, 'controlPoint3y', -1.0, 1.0).onChange(function(newVal)
   {
     guiParameters.controlPoint3y = newVal;
-    createFeathers(scene);
+    // createFeathers(scene);
     changeSpline();
-    featherDistribution();
-    orientationChanged();
-    featherSizeChanged();
+    createFeathers(scene);
+    // featherDistribution();
+    // orientationChanged();
+    // featherSizeChanged();
   });
 }
 
