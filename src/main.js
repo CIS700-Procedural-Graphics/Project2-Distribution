@@ -9,10 +9,13 @@ var feathers = new THREE.Object3D();
 
 var guiParameters = {
     windStrength: 3.0, //0 to 10
+    windDirectionX: 0.0, //0 to 1
+    windDirectionY: 0.0, //0 to 1
+    windDirectionZ: 1.0, //0 to 1
     curvature: 0.0, //increase curvature of spline 1 to 10
-    Layer1ColorR: 0.3,
-    Layer1ColorG: 0.3,
-    Layer1ColorB: 0.7,
+    Layer1ColorR: 0.0902,
+    Layer1ColorG: 0.1961,
+    Layer1ColorB: 0.5411,
     Layer2ColorR: 0.3,
     Layer2ColorG: 0.7,
     Layer2ColorB: 0.3,
@@ -24,6 +27,23 @@ var guiParameters = {
     featherOrientation: 1.0, //increase curvature of individual feathers 1 to 10
     flappingSpeed: 1.0, //0 to 10
     flappingMotion: 0.0 //change orientation of entire wing 0 to 1
+}
+
+var feather_Material = new THREE.ShaderMaterial({
+  uniforms:
+  {
+    feathercolor:
+    {
+        type: "v3",
+        value: new THREE.Vector3( 0.0902, 0.1961, 0.5411 )
+    }
+  },
+  vertexShader: require('./shaders/feather-vert.glsl'),
+  fragmentShader: require('./shaders/feather-frag.glsl')
+});
+
+function dynamicLayers()
+{
 }
 
 // called after the scene loads
@@ -83,7 +103,8 @@ function onLoad(framework) {
         featherGeo = obj.children[0].geometry;
         for(var i=0; i<levelOfDetail ;i++)
         {
-          var featherMesh = new THREE.Mesh(featherGeo, lambertBlue);
+          //var featherMesh = new THREE.Mesh(featherGeo, lambertBlue);
+          var featherMesh = new THREE.Mesh(featherGeo, feather_Material);
           featherMesh.name = "feather";
           var position = splineGeom.vertices[i];
           featherMesh.position.set(position.x, position.y, 0);
@@ -118,6 +139,18 @@ function onLoad(framework) {
     gui.add(guiParameters, 'windStrength', 0, 10).onChange(function(newVal)
     {
       guiParameters.windStrength = newVal;
+    });
+    gui.add(guiParameters, 'windDirectionX', 0, 1).onChange(function(newVal)
+    {
+      guiParameters.windDirectionX = newVal;
+    });
+    gui.add(guiParameters, 'windDirectionY', 0, 1).onChange(function(newVal)
+    {
+      guiParameters.windDirectionY = newVal;
+    });
+    gui.add(guiParameters, 'windDirectionZ', 0, 1).onChange(function(newVal)
+    {
+      guiParameters.windDirectionZ = newVal;
     });
     gui.add(guiParameters, 'curvature', 1, 10).onChange(function(newVal)
     {
@@ -157,19 +190,30 @@ function onLoad(framework) {
     });
 }
 
+// function noisehash(var t)
+// {
+//   t  = fract( t*0.3183099+0.1 ) * 17.0;
+//   return fract( t );
+// }
+
 // called on frame updates
-function onUpdate(framework) {
-    var feather = framework.scene.getObjectByName("feather");
-    if (feather !== undefined) {
-        // Simply flap wing
-        var date = new Date();
-        //feather.rotateZ(Math.sin(date.getTime() / 100) * 2 * Math.PI / 180);
-        for(var i=0; i<levelOfDetail; i++)
-        {
-          feathers.children[i].rotateZ(Math.sin(date.getTime() / 100) * 2 * Math.PI / 180);
-        }
+function onUpdate(framework)
+{
+    var date = new Date();
+    feathers.rotateY(Math.sin(date.getTime() / 100) * 2 * Math.PI / 180);
+    for(var i=0; i<levelOfDetail; i++)
+    {
+      feathers.children[i].rotateX((Math.sin(date.getTime() / 100) * 2 * Math.PI / 180) *
+                                   (guiParameters.windDirectionX * guiParameters.windStrength));
+      feathers.children[i].rotateY((Math.sin(date.getTime() / 100) * 2 * Math.PI / 180) *
+                                   (guiParameters.windDirectionY * guiParameters.windStrength));
+      feathers.children[i].rotateZ((Math.sin(date.getTime() / 100) * 2 * Math.PI / 180) *
+                                   (guiParameters.windDirectionZ * guiParameters.windStrength));
     }
 
+    feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer1ColorR,
+                                                                      guiParameters.Layer1ColorG,
+                                                                      guiParameters.Layer1ColorB );
 }
 
 // when the scene is done initializing, it will call onLoad, then on frame updates, call onUpdate
