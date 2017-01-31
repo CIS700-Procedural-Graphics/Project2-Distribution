@@ -77,7 +77,7 @@ function onLoad(framework) {
     var objLoader = new THREE.OBJLoader();
     var featherGeo = new THREE.Geometry();
 
-    objLoader.load('/geo/feather.obj', function(obj)
+    objLoader.load('geo/feather.obj', function(obj)
     {
         // LOOK: This function runs after the obj has finished loading
         featherGeo = obj.children[0].geometry;
