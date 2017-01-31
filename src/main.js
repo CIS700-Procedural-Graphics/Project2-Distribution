@@ -6,6 +6,8 @@ import Framework from './framework'
 
 //var levelOfDetail = 50;
 var feathers = new THREE.Object3D();
+var feathersLayer2 = new THREE.Object3D();
+var feathersLayer3 = new THREE.Object3D();
 var splineObject = new THREE.Line();
 var curve = new THREE.SplineCurve( [
      new THREE.Vector2( 1, 0 ),
@@ -40,7 +42,7 @@ var guiParameters = {
     numberOfFeathers: 50,
     featherDistribution: 1.0, //clumping factor from 0 to 1
     featherSize: 1.0, //
-    featherOrientation: 1.0, //increase curvature of individual feathers 1 to 10
+    featherOrientation: 0.0, //increase curvature of individual feathers 1 to 10
     flappingSpeed: 1.0, //0 to 10
     flappingMotion: 1.0 //change orientation of entire wing 0 to 1
 }
@@ -58,8 +60,71 @@ var feather_Material = new THREE.ShaderMaterial({
   fragmentShader: require('./shaders/feather-frag.glsl')
 });
 
-function dynamicLayers()
+function dynamicLayers(scene)
 {
+  //remove old feathers
+  for(var i=0; i<guiParameters.numberOfFeathers ;i++)
+  {
+    if(feathersLayer2.children[i])
+    {
+      scene.remove(feathersLayer2.children[i]);
+      feathers.remove(feathersLayer2.children[i]);
+    }
+    if(feathersLayer3.children[i])
+    {
+      scene.remove(feathersLayer3.children[i]);
+      feathers.remove(feathersLayer3.children[i]);
+    }
+  }
+
+  //add layers
+  for(var i=0; i<Math.round(guiParameters.numberOfFeathers * 0.75) ;i++)
+  {
+    featherMesh = new THREE.Mesh(featherGeo, feather_Material);
+    var position = splineGeom.vertices[i];
+    featherMesh.position.set(position.x, position.y, 0);
+    featherMesh.scale.set(0.3, 0.3, 0.3);
+    var radianY = -90 * (Math.PI/180);
+    var radianZ = -90 * (Math.PI/180);
+    featherMesh.rotateY( radianY );
+    featherMesh.rotateZ( radianZ );
+    feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer2ColorR,
+                                                                      guiParameters.Layer2ColorG,
+                                                                      guiParameters.Layer2ColorB );
+    feathersLayer2.add(featherMesh);
+  }
+
+  for(var i=0; i<Math.round(guiParameters.numberOfFeathers * 0.5) ;i++)
+  {
+    featherMesh = new THREE.Mesh(featherGeo, feather_Material);
+    var position = splineGeom.vertices[i];
+    featherMesh.position.set(position.x, position.y, 0);
+    featherMesh.scale.set(0.3, 0.3, 0.3);
+    var radianY = -90 * (Math.PI/180);
+    var radianZ = -90 * (Math.PI/180);
+    featherMesh.rotateY( radianY );
+    featherMesh.rotateZ( radianZ );
+    feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer3ColorR,
+                                                                      guiParameters.Layer3ColorG,
+                                                                      guiParameters.Layer3ColorB );
+    feathersLayer3.add(featherMesh);
+  }
+
+  //scale layer groups and position them appropriately
+  var L2scale = guiParameters.featherSize * 0.6;
+  var L3scale = guiParameters.featherSize * 0.4;
+  feathersLayer2.scale.set(L2scale, L2scale, L2scale);
+  feathersLayer3.scale.set(L3scale, L3scale, L3scale);
+
+  var L1posx = feathers.position.x;
+  var L1posy = feathers.position.y;
+  var L1posz = feathers.position.z;
+  feathersLayer2.position.set(L1posx + 0.2, L1posy + 0.3, L1posz);
+  feathersLayer3.position.set(L1posx + 0.4, L1posy + 0.5, L1posz);
+
+  //add to scene
+  scene.add(feathersLayer2);
+  scene.add(feathersLayer3);
 }
 
 var featherOriginalX = [];
@@ -95,6 +160,20 @@ function createFeathers(scene)
   oldNum = guiParameters.numberOfFeathers;
 }
 
+function orientationChanged()
+{
+  for(var i=0; i<guiParameters.numberOfFeathers ;i++)
+  {
+    if(feathers.children[i])
+    {
+      var radX = guiParameters.featherOrientation * 0.1 * Math.random();
+      var radX = guiParameters.featherOrientation;
+      feathers.children[i].rotateX(radX + Math.random() * 0.1, radX + Math.random() * 0.1, radX + Math.random() * 0.1);
+      feathers.children[i].rotateY(radX + Math.random() * 0.1, radX + Math.random() * 0.1, radX + Math.random() * 0.1);
+    }
+  }
+}
+
 function changeGUI(framework)
 {
   var scene = framework.scene;
@@ -123,49 +202,59 @@ function changeGUI(framework)
   f8.add(guiParameters, 'Layer2ColorR', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer2ColorR = newVal;
+    dynamicLayers(scene);
   });
   f8.add(guiParameters, 'Layer2ColorG', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer2ColorG = newVal;
+    dynamicLayers(scene);
   });
   f8.add(guiParameters, 'Layer2ColorB', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer2ColorB = newVal;
+    dynamicLayers(scene);
   });
 
   f9.add(guiParameters, 'Layer3ColorR', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer3ColorR = newVal;
+    dynamicLayers(scene);
   });
   f9.add(guiParameters, 'Layer3ColorG', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer3ColorG = newVal;
+    dynamicLayers(scene);
   });
   f9.add(guiParameters, 'Layer3ColorB', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer3ColorB = newVal;
+    dynamicLayers(scene);
   });
 
   var f2 = gui.addFolder('Feathers');
   f2.add(guiParameters, 'featherDistribution', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.featherDistribution = newVal;
-
+    createFeathers(scene);
+    featherDistribution();
   });
   f2.add(guiParameters, 'featherSize', 0.3, 2.0).onChange(function(newVal)
   {
     guiParameters.featherSize = newVal;
+    createFeathers(scene);
     featherSizeChanged();
   });
-  f2.add(guiParameters, 'featherOrientation', 0.0, 1.0).onChange(function(newVal)
+  f2.add(guiParameters, 'featherOrientation', -1.5, 1.5).onChange(function(newVal)
   {
     guiParameters.featherOrientation = newVal;
+    createFeathers(scene);
+    orientationChanged();
   });
   f2.add(guiParameters, 'numberOfFeathers', 30, 200).onChange(function(newVal)
   {
     guiParameters.numberofFeathers = newVal;
-    changeSpline()
-    createFeathers(scene)
+    createFeathers(scene);
+    changeSpline();
   });
 
   var f3 = gui.addFolder('Flapping');
@@ -173,10 +262,10 @@ function changeGUI(framework)
   {
     guiParameters.flappingSpeed = newVal;
   });
-  f3.add(guiParameters, 'flappingMotion', 0.0, 1.0).onChange(function(newVal)
-  {
-    guiParameters.flappingMotion = newVal;
-  });
+  // f3.add(guiParameters, 'flappingMotion', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.flappingMotion = newVal;
+  // });
 
   var f4 = gui.addFolder('Wind');
   f4.add(guiParameters, 'windStrength', 0.0, 10.0).onChange(function(newVal)
@@ -230,6 +319,37 @@ function changeGUI(framework)
     changeSpline()
     createFeathers(scene)
   });
+}
+
+function powercurve(x, a, b)
+{
+  var k = Math.pow(a+b, a+b)/(Math.pow(a,a)*Math.pow(b,b));
+  return k* Math.pow(x,a) * Math.pow(1.0 -x, b);
+}
+
+function impulse( k, x)
+{
+  var h = k*x;
+  return h*Math.exp(1.0 - h);
+}
+
+function featherDistribution()
+{
+  for(var i=0; i<guiParameters.numberOfFeathers ;i++)
+  {
+    if(feathers.children[i])
+    {
+      PathLayer1 = new THREE.Path( curve.getPoints( 1000 ) );
+      splineGeom = PathLayer1.createPointsGeometry(1000);
+
+      var t = i/guiParameters.numberOfFeathers;
+      // var factor = (powercurve(t, 0.5, 0.5) +impulse (3, t))/2.0;
+      var x = (powercurve(t, guiParameters.featherDistribution, 1-guiParameters.featherDistribution));
+      //console.log(x);
+      var position = splineGeom.vertices[Math.round(x*1000)];
+      feathers.children[i].position.set(position.x, position.y, 0);
+    }
+  }
 }
 
 function setupLightsandSkybox(framework)
@@ -323,9 +443,9 @@ function windChanged()
 
 function featherSizeChanged()
 {
-  if(feathers.children[i])
+  for(var i=0; i<guiParameters.numberOfFeathers ;i++)
   {
-    for(var i=0; i<guiParameters.numberOfFeathers ;i++)
+    if(feathers.children[i])
     {
       feathers.children[i].scale.set(guiParameters.featherSize, guiParameters.featherSize, guiParameters.featherSize);
     }
@@ -405,7 +525,7 @@ function onUpdate(framework)
   var date = new Date();
   windChanged();
   // changeSpline();
-
+  //orientationChanged();
   var y_rotation = Math.sin(date.getTime() / 100) * 2 * Math.PI / 180;
   splineObject.rotateY(guiParameters.flappingSpeed * y_rotation);
   feathers.rotateY(guiParameters.flappingSpeed * y_rotation);
@@ -413,6 +533,12 @@ function onUpdate(framework)
   feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer1ColorR,
                                                                     guiParameters.Layer1ColorG,
                                                                     guiParameters.Layer1ColorB );
+  // feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer2ColorR,
+  //                                                                   guiParameters.Layer2ColorG,
+  //                                                                   guiParameters.Layer2ColorB );
+  // feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer3ColorR,
+  //                                                                   guiParameters.Layer3ColorG,
+  //                                                                   guiParameters.Layer3ColorB );
 }
 
 // when the scene is done initializing, it will call onLoad, then on frame updates, call onUpdate
