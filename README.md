@@ -11,15 +11,16 @@ GUI controls let you:
 
 1. Change the colors of the feathers of the wing
 
-2. Change the strength and direction of wind, which is seen as a small perturbarance 
+2. Change the strength and direction of wind, which is seen as a small perturbarance
 
-3. Change the persistence of the octaves of Noise
+3. Change the flapping speed of the wing
 
-4. Change the number of octaves of Noise
+4. Change the control points of the spline that determines the wing shape
 
-5. Change the field of view of the camera
+5. Change various aspects of the feathers on the wing: the number of feathers, how they're distributed,
+their orientation, and their size
 
-6. Change the aspect ratio of the camera
+6. Change the field of view of the camera
 
 The UVs are updated constantly to make the surface of the sphere seem animated.
 
@@ -27,26 +28,19 @@ The UVs are updated constantly to make the surface of the sphere seem animated.
 
 #### main.js description
 
-1. Created a Icosahedron geometry, which when sub-dived approximates a sphere really well.
+1. Created a spline curve using four control points, which defines the high level look of a birds wing.
 
-2. Using this approximated sphere and a custom material 'color_Material', I created a sphere mesh, that was added to the scene.
+2. I then generated a bunch of feathers at various points along the curve.
 
-3. The color_Material contains multiple uniforms (including multiple textures that will be used with different image samplers), that will be passed too the shader to control various aspects. Some of these uniforms were also added to the GUI to increase interactivity.
-   'color_Material' also holds the creates its own fragment and vertex shaders (all Materials in nodejs do).
+3. The feather_Material shader contains a uniform that allows us to dynamically change the color of the feathers.
 
-4. All the GUI parameters and uniforms used by the shader are updated to create a dynamic looking scene in 'function onUpdate(framework)'
+4. The GUI parameters are all applied to  control aspects of feather generation and wing shape determination. This necessitates
+that atleast a few, such as number of feahers, result in the removal of all objects from the scene and overall feather group, to be added again with new properties.
+
+5. All the GUI parameters updated to create a dynamic looking scene in 'function onUpdate(framework)'
 
 #### Shaders
 
-##### Vertex Shader
-
-1. The Vertex shader deals with the actual Noise function, using which we deform the position, of that vertex along it's surface normal.
-
-2. The noise function is a multi-octave noise function, that utilizes a simple hash function to map a 3D point to some unique noise value.
-The noise function also makes use of a cosine interpolation and smoothing stage to give a less jittery and smooth noise output.
-
-3. The noise output is just a float value that scales the normal of that vertex and adds this scaled normal to the vertex position.
-
 ##### Fragment Shader
 
-1. The fragment shader utilizes a flag to determine which image sampler, if any, is to be used to create a colorful deformed sphere at every timestep.
+1. The fragment shader utilizes the uniform color passed in to color in fragments
