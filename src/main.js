@@ -60,71 +60,135 @@ var feather_Material = new THREE.ShaderMaterial({
   fragmentShader: require('./shaders/feather-frag.glsl')
 });
 
+var feather_Material2 = new THREE.ShaderMaterial({
+  uniforms:
+  {
+    feathercolor:
+    {
+        type: "v3",
+        value: new THREE.Vector3( 0.0902, 0.1961, 0.5411 )
+    }
+  },
+  vertexShader: require('./shaders/feather-vert.glsl'),
+  fragmentShader: require('./shaders/feather-frag.glsl')
+});
+
+var feather_Material3 = new THREE.ShaderMaterial({
+  uniforms:
+  {
+    feathercolor:
+    {
+        type: "v3",
+        value: new THREE.Vector3( 0.0902, 0.1961, 0.5411 )
+    }
+  },
+  vertexShader: require('./shaders/feather-vert.glsl'),
+  fragmentShader: require('./shaders/feather-frag.glsl')
+});
+
 function dynamicLayers(scene)
 {
-  //remove old feathers
-  for(var i=0; i<guiParameters.numberOfFeathers ;i++)
-  {
-    if(feathersLayer2.children[i])
-    {
-      scene.remove(feathersLayer2.children[i]);
-      feathers.remove(feathersLayer2.children[i]);
-    }
-    if(feathersLayer3.children[i])
-    {
-      scene.remove(feathersLayer3.children[i]);
-      feathers.remove(feathersLayer3.children[i]);
-    }
-  }
+  /*
+  // //remove old feathers
+  // // for(var i=0; i<guiParameters.numberOfFeathers ;i++)
+  // // {
+  // //   if(feathersLayer2.children[i])
+  // //   {
+  // //     scene.remove(feathersLayer2.children[i]);
+  // //     feathers.remove(feathersLayer2.children[i]);
+  // //   }
+  // //   if(feathersLayer3.children[i])
+  // //   {
+  // //     scene.remove(feathersLayer3.children[i]);
+  // //     feathers.remove(feathersLayer3.children[i]);
+  // //   }
+  // // }
+  //
+  // //add layers
+  // feather_Material2.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer2ColorR,
+  //                                                                   guiParameters.Layer2ColorG,
+  //                                                                   guiParameters.Layer2ColorB );
+  //
+  // for(var i=0; i<Math.round(guiParameters.numberOfFeathers * 0.75) ;i++)
+  // {
+  //   featherMesh = new THREE.Mesh(featherGeo, feather_Material2);
+  //   var position = splineGeom.vertices[i];
+  //   featherMesh.position.set(position.x, position.y, 0);
+  //   featherMesh.scale.set(0.3, 0.3, 0.3);
+  //   var radianY = -90 * (Math.PI/180);
+  //   var radianZ = -90 * (Math.PI/180);
+  //   featherMesh.rotateY( radianY );
+  //   featherMesh.rotateZ( radianZ );
+  //   feathersLayer2.add(featherMesh);
+  // }
+  //
+  // feather_Material3.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer3ColorR,
+  //                                                                   guiParameters.Layer3ColorG,
+  //                                                                   guiParameters.Layer3ColorB );
+  //
+  // for(var i=0; i<Math.round(guiParameters.numberOfFeathers * 0.5) ;i++)
+  // {
+  //   featherMesh = new THREE.Mesh(featherGeo, feather_Material3);
+  //   var position = splineGeom.vertices[i];
+  //   featherMesh.position.set(position.x, position.y, 0);
+  //   featherMesh.scale.set(0.3, 0.3, 0.3);
+  //   var radianY = -90 * (Math.PI/180);
+  //   var radianZ = -90 * (Math.PI/180);
+  //   featherMesh.rotateY( radianY );
+  //   featherMesh.rotateZ( radianZ );
+  //   feathersLayer3.add(featherMesh);
+  // }
+  //
+  // //scale layer groups and position them appropriately
+  // var L2scale = guiParameters.featherSize * 0.6;
+  // var L3scale = guiParameters.featherSize * 0.4;
+  // feathersLayer2.scale.set(L2scale, L2scale, L2scale);
+  // feathersLayer3.scale.set(L3scale, L3scale, L3scale);
+  //
+  // var L1posx = feathers.position.x;
+  // var L1posy = feathers.position.y;
+  // var L1posz = feathers.position.z;
+  // feathersLayer2.position.set(L1posx + 0.2, L1posy + 0.3, L1posz);
+  // feathersLayer3.position.set(L1posx + 0.4, L1posy + 0.5, L1posz);
+  //
+  // //add to scene
+  // scene.add(feathersLayer2);
+  // scene.add(feathersLayer3);
+  */
 
-  //add layers
-  for(var i=0; i<Math.round(guiParameters.numberOfFeathers * 0.75) ;i++)
+  feather_Material2.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer2ColorR,
+                                                                    guiParameters.Layer2ColorG,
+                                                                    guiParameters.Layer2ColorB );
+
+  for(var i=guiParameters.numberOfFeathers* (1.0/3.0); i<guiParameters.numberOfFeathers* (2.0/3.0) ;i++)
   {
-    featherMesh = new THREE.Mesh(featherGeo, feather_Material);
-    var position = splineGeom.vertices[i];
-    featherMesh.position.set(position.x, position.y, 0);
-    featherMesh.scale.set(0.3, 0.3, 0.3);
+    featherMesh = new THREE.Mesh(featherGeo, feather_Material2);
+    var position = splineGeom.vertices[Math.round(i/0.34)];
+    featherMesh.position.set(position.x, position.y - 0.3, 0);
+    featherMesh.scale.set(0.3 * 0.8, 0.3 *1.5, 0.3 * 0.8);
     var radianY = -90 * (Math.PI/180);
     var radianZ = -90 * (Math.PI/180);
     featherMesh.rotateY( radianY );
     featherMesh.rotateZ( radianZ );
-    feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer2ColorR,
-                                                                      guiParameters.Layer2ColorG,
-                                                                      guiParameters.Layer2ColorB );
-    feathersLayer2.add(featherMesh);
+    feathers.add(featherMesh);
   }
-
-  for(var i=0; i<Math.round(guiParameters.numberOfFeathers * 0.5) ;i++)
+  feather_Material3.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer3ColorR,
+                                                                     guiParameters.Layer3ColorG,
+                                                                     guiParameters.Layer3ColorB );
+  for(var i=guiParameters.numberOfFeathers* (2.0/3.0); i<guiParameters.numberOfFeathers ;i++)
   {
-    featherMesh = new THREE.Mesh(featherGeo, feather_Material);
-    var position = splineGeom.vertices[i];
-    featherMesh.position.set(position.x, position.y, 0);
-    featherMesh.scale.set(0.3, 0.3, 0.3);
+    featherMesh = new THREE.Mesh(featherGeo, feather_Material3);
+    var position = splineGeom.vertices[Math.round(i/0.27)];
+    featherMesh.position.set(position.x, position.y - 0.5, 0);
+    featherMesh.scale.set(0.3 * 0.65, 0.3 *1.7, 0.3 * 0.65);
     var radianY = -90 * (Math.PI/180);
     var radianZ = -90 * (Math.PI/180);
     featherMesh.rotateY( radianY );
     featherMesh.rotateZ( radianZ );
-    feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer3ColorR,
-                                                                      guiParameters.Layer3ColorG,
-                                                                      guiParameters.Layer3ColorB );
-    feathersLayer3.add(featherMesh);
+    feathers.add(featherMesh);
   }
 
-  //scale layer groups and position them appropriately
-  var L2scale = guiParameters.featherSize * 0.6;
-  var L3scale = guiParameters.featherSize * 0.4;
-  feathersLayer2.scale.set(L2scale, L2scale, L2scale);
-  feathersLayer3.scale.set(L3scale, L3scale, L3scale);
-
-  var L1posx = feathers.position.x;
-  var L1posy = feathers.position.y;
-  var L1posz = feathers.position.z;
-  feathersLayer2.position.set(L1posx + 0.2, L1posy + 0.3, L1posz);
-  feathersLayer3.position.set(L1posx + 0.4, L1posy + 0.5, L1posz);
-
-  //add to scene
-  scene.add(feathersLayer2);
-  scene.add(feathersLayer3);
+  // createFeathers();
 }
 
 var featherOriginalX = [];
@@ -156,6 +220,9 @@ function createFeathers(scene)
     featherMesh.rotateZ( radianZ );
     feathers.add(featherMesh);
   }
+
+  // dynamicLayers(scene);
+
   scene.add(feathers);
   oldNum = guiParameters.numberOfFeathers;
 }
@@ -202,33 +269,33 @@ function changeGUI(framework)
   f8.add(guiParameters, 'Layer2ColorR', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer2ColorR = newVal;
-    dynamicLayers(scene);
+    createFeathers(scene)
   });
   f8.add(guiParameters, 'Layer2ColorG', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer2ColorG = newVal;
-    dynamicLayers(scene);
+    createFeathers(scene)
   });
   f8.add(guiParameters, 'Layer2ColorB', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer2ColorB = newVal;
-    dynamicLayers(scene);
+    createFeathers(scene)
   });
 
   f9.add(guiParameters, 'Layer3ColorR', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer3ColorR = newVal;
-    dynamicLayers(scene);
+    createFeathers(scene)
   });
   f9.add(guiParameters, 'Layer3ColorG', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer3ColorG = newVal;
-    dynamicLayers(scene);
+    createFeathers(scene)
   });
   f9.add(guiParameters, 'Layer3ColorB', 0.0, 1.0).onChange(function(newVal)
   {
     guiParameters.Layer3ColorB = newVal;
-    dynamicLayers(scene);
+    createFeathers(scene)
   });
 
   var f2 = gui.addFolder('Feathers');
@@ -252,9 +319,9 @@ function changeGUI(framework)
   });
   f2.add(guiParameters, 'numberOfFeathers', 30, 200).onChange(function(newVal)
   {
-    guiParameters.numberofFeathers = newVal;
+    guiParameters.numberofFeathers = newVal;//3*newVal;
+    // changeSpline();
     createFeathers(scene);
-    changeSpline();
   });
 
   var f3 = gui.addFolder('Flapping');
@@ -298,8 +365,8 @@ function changeGUI(framework)
   f6.add(guiParameters, 'controlPoint2x', -1.0, 1.0).onChange(function(newVal)
   {
     guiParameters.controlPoint2x = newVal;
-    changeSpline()
-    createFeathers(scene)
+    changeSpline();
+    createFeathers(scene);
   });
   f6.add(guiParameters, 'controlPoint2y', -1.0, 1.0).onChange(function(newVal)
   {
@@ -525,7 +592,7 @@ function onUpdate(framework)
   var date = new Date();
   windChanged();
   // changeSpline();
-  //orientationChanged();
+  // orientationChanged();
   var y_rotation = Math.sin(date.getTime() / 100) * 2 * Math.PI / 180;
   splineObject.rotateY(guiParameters.flappingSpeed * y_rotation);
   feathers.rotateY(guiParameters.flappingSpeed * y_rotation);
