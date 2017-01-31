@@ -105,15 +105,17 @@
 	
 	    function repaint() {
 	        // Set light
-	        var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-	        directionalLight.color.setHSL(0.1, 1, 0.95);
-	        directionalLight.position.set(1, 3, 2);
-	        directionalLight.position.multiplyScalar(10);
-	
 	        // remove all scene children
 	        for (var i = 0; i < feathers.length; i++) {
 	            scene.remove(feathers[i]);
 	        }
+	        for (var i = 0; i < scene.children.length; i++) {
+	            scene.remove(scene.children[i]);
+	        }
+	        var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+	        directionalLight.color.setHSL(0.1, 1, 0.95);
+	        directionalLight.position.set(1, 3, 2);
+	        directionalLight.position.multiplyScalar(10);
 	
 	        materials = [];
 	        feathers = [];
@@ -147,8 +149,8 @@
 	                materials[i] = new THREE.MeshLambertMaterial({ color: baseColor });
 	                feathers[idx] = new THREE.Mesh(featherGeo, materials[i]);
 	                var r = feathers[idx].material.color.r;
-	                var g = feathers[idx].material.color.g + bias(guiVar.colorBias, i);
-	                var b = feathers[idx].material.color.b + bias(guiVar.colorBias, i);;
+	                var g = feathers[idx].material.color.g + bias(0.2, i);
+	                var b = feathers[idx].material.color.b + bias(0.2, i);;
 	                feathers[idx].material.color.setRGB(r, g, b);
 	
 	                // Set position
