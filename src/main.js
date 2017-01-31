@@ -3,6 +3,19 @@
 
 const THREE = require('three'); // older modules are imported like this. You shouldn't have to worry about this much
 import Framework from './framework'
+import Distribution from './distribution'
+
+//geometry of feather, will be created when obj loaded
+var featherGeo;
+
+//curve that defines the shape of the wing, feather positions will start from here
+var curve = new THREE.CatmullRomCurve3( [
+       new THREE.Vector3( -2.5, -0.5, 1.15 ),
+       new THREE.Vector3( -2.25, 0.25, 1.25 ),
+       new THREE.Vector3( 0, 0, 0.25 ),
+       new THREE.Vector3( 1.5, -0.25, 0 ),
+       new THREE.Vector3( 2.5, 0.25, 0 )
+] );
 
 // called after the scene loads
 function onLoad(framework) {
@@ -23,7 +36,7 @@ function onLoad(framework) {
 
     // set skybox
     var loader = new THREE.CubeTextureLoader();
-    var urlPrefix = '/images/skymap/';
+    var urlPrefix = 'images/skymap/';
 
     var skymap = new THREE.CubeTextureLoader().load([
         urlPrefix + 'px.jpg', urlPrefix + 'nx.jpg',
@@ -33,39 +46,127 @@ function onLoad(framework) {
 
     scene.background = skymap;
 
-    // load a simple obj mesh
-    var objLoader = new THREE.OBJLoader();
-    objLoader.load('/geo/feather.obj', function(obj) {
-
-        // LOOK: This function runs after the obj has finished loading
-        var featherGeo = obj.children[0].geometry;
-
-        var featherMesh = new THREE.Mesh(featherGeo, lambertWhite);
-        featherMesh.name = "feather";
-        scene.add(featherMesh);
-    });
-
     // set camera position
     camera.position.set(0, 1, 5);
     camera.lookAt(new THREE.Vector3(0,0,0));
 
-    // scene.add(lambertCube);
     scene.add(directionalLight);
+
+    // load a simple obj mesh
+    var objLoader = new THREE.OBJLoader();
+    objLoader.load('geo/feather.obj', function(obj) {
+
+    // LOOK: This function runs after the obj has finished loading
+    featherGeo = obj.children[0].geometry;
+
+    //create 100 feathers, deciding positions, rotations and scales using function from distribution.js
+    for(var i = 0.0; i < 100.0; i++)
+    {
+        var featherColor = new THREE.ShaderMaterial({
+            uniforms: {
+                layer: { 
+                    value: i
+                },
+                light: {
+                    value: directionalLight.position
+                },
+                colorType: { //will dictate what pallete of colors the wings will be 
+                    value: 1
+                },
+            },
+            //using my own shaders to dictate color interpolation, lambert, iridescence
+            vertexShader: require('./shaders/feather-vert.glsl'),
+            fragmentShader: require('./shaders/feather-frag.glsl')
+        });
+
+        //creating a mesh object for this feather
+        var featherMesh = new THREE.Mesh(featherGeo, featherColor);
+        featherMesh.name = "feather" + i; //used in onUpdate
+
+        //sent into distribution functions to get correct placement, orientation, and scale based on curve and number of feathers
+        var params = {
+            num: i,
+            total1: 45,
+            total2: 75,
+            total3: 100,
+            curve: curve
+        };
+
+        Distribution.getPos(featherMesh, params);
+        Distribution.getRot(featherMesh, params);
+        Distribution.getScale(featherMesh, params);
+        scene.add(featherMesh);
+    }
+});
 
     // edit params and listen to changes like this
     // more information here: https://workshop.chromeexperiments.com/examples/gui/#1--Basic-Usage
     gui.add(camera, 'fov', 0, 180).onChange(function(newVal) {
         camera.updateProjectionMatrix();
     });
+
+    gui.add(Distribution, 'curvature', 0.0, 4.0).onChange(function(newVal) {
+        Distribution.updateCurve(newVal);
+    });
+
+    gui.add(Distribution, 'featherDistribution', 0.0, 1.0).onChange(function(newVal) {
+        Distribution.updateDistrib(newVal);
+    });
+
+    gui.add(Distribution, 'featherSize', 0.0, 2.0).onChange(function(newVal) {
+        Distribution.updateSize(newVal);
+    });
+
+    gui.add(Distribution, 'featherOrientation', -1.0, 1.0).onChange(function(newVal) {
+        Distribution.updateOrient(newVal);
+    });
+
+    gui.add(Distribution, 'color', 1, 2).onChange(function(newVal) {
+        Distribution.changeColor();
+        for(var i = 0.0; i < 100.0; i++)
+        {
+            var f = framework.scene.getObjectByName("feather" + i);
+            if(f !== undefined)
+            {
+                f.material.uniforms["colorType"].value = Distribution.color;
+            }         
+        }
+    });
+
+    gui.add(Distribution, 'windSpeed', 0.0, 1.0).onChange(function(newVal) {
+        Distribution.updateSpeed(newVal);
+    });
+
+    gui.add(Distribution, 'flapSpeed', 0.0, 5.0).onChange(function(newVal) {
+        Distribution.updateFlapSpeed(newVal);
+    });
+
+    gui.add(Distribution, 'windDirection', -90.0, 90.0).onChange(function(newVal) {
+        Distribution.updateDir(newVal);
+    });
 }
 
 // called on frame updates
 function onUpdate(framework) {
-    var feather = framework.scene.getObjectByName("feather");    
-    if (feather !== undefined) {
-        // Simply flap wing
-        var date = new Date();
-        feather.rotateZ(Math.sin(date.getTime() / 100) * 2 * Math.PI / 180);        
+    //increment time and recompute position, orientation, scale based on the new time
+    Distribution.incTime();
+    for(var i = 0.0; i < 100.0; i++)
+    {
+        var f = framework.scene.getObjectByName("feather" + i);
+        if(f !== undefined)
+        {
+            var params = {
+                num: i,
+                total1: 45,
+                total2: 75,
+                total3: 100,
+                curve: curve
+            };
+
+            Distribution.getPos(f, params);
+            Distribution.getRot(f, params);
+            Distribution.getScale(f, params);
+        }            
     }
 }
 
