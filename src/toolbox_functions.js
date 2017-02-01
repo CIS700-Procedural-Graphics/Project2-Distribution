@@ -152,7 +152,32 @@ export function updateZPosition(featherMesh, i, numFeathersInLayer, position_exp
 	var startZPos = 0;
 	var endZPos = 16;
 	var weight = i / numFeathersInLayer;
-	//featherMesh.position.set(featherMesh.position.x, featherMesh.position.y, lerp(startZPos, endZPos, Math.pow(weight, position_exponent)));
 	featherMesh.position.z = lerp(startZPos, endZPos, Math.pow(weight, position_exponent));
-	//console.log(position_exponent);
+}
+
+export function updateXRotation(featherMesh, rotAmount) {
+	featherMesh.rotateX(rotAmount);
+}
+
+export function updateYRotation(featherMesh, rotAmount) {
+	featherMesh.rotateY(rotAmount);
+}
+
+export function updateZRotation(featherMesh, rotAmount) {
+	featherMesh.rotateZ(rotAmount);
+}
+
+export function flapWing(featherMesh, i, numFeathersInLayer, flapScale, flapValue) {
+	var startYPos = -(flapScale / 4);
+	var endYPos = flapScale / 4;
+	var Yweight = (flapValue + 1) / 2;
+	var yFinalPos = lerp(startYPos, endYPos, Yweight);
+	var weight = i / numFeathersInLayer;
+	featherMesh.position.y += lerp(yFinalPos, 0, Math.pow(weight, 0.33));
+}
+
+export function applyWind(featherGroup, windIntensity) {
+	featherGroup.position.x += jitter(0, windIntensity);
+	featherGroup.position.y += jitter(0, windIntensity);
+	featherGroup.position.z += jitter(0, windIntensity);
 }

@@ -3,7 +3,16 @@
 
 const THREE = require('three'); // older modules are imported like this. You shouldn't have to worry about this much
 import Framework from './framework'
-import {layer1, layer2, layer3, layer4, updateYPosition, updateZPosition} from './toolbox_functions'
+import {layer1, layer2, layer3, layer4, updateYPosition, updateZPosition, updateXRotation, updateYRotation, updateZRotation, updateXScale, updateYScale, updateZScale, flapWing, applyWind} from './toolbox_functions'
+
+var featherGroup = new THREE.Object3D();
+featherGroup.name = 'feather_group';
+
+var flappingSpeed = { flappingSpeedScale : 1 }; //This goes into the onUpdate function and scale up/down the sin function.
+
+var flappingMotion = { flappingMotionScale : 1 }; //Like above. scales up/down the amplitude of the sin function.
+
+var windIntensity = { wind_intensity : 0.01};
 
 var numFeathers; //set after loading in the feather obj during the callback function
 
@@ -13,10 +22,70 @@ var layer2Num = 100;
 var layer3Num = 150;
 var layer4Num = 25;
 
+function ApplyWind(framework) {
+	applyWind(featherGroup, 0.15);
+}
+
+function flapEachFeather(framework, flapScale, flapValue) {
+	for(var i = 0; i < layer1Num; i++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + i);
+		flapWing(currentFeather, i, layer1Num, flapScale, flapValue);
+	}
+	
+	for(var j = 0; j < layer2Num; j++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j));
+		flapWing(currentFeather, j, layer2Num, flapScale, flapValue);
+	}
+	
+	for(var k = 0; k < layer3Num; k++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j + k));
+		flapWing(currentFeather, k, layer3Num, flapScale, flapValue);
+	}
+	
+	for(var l = 0; l < layer4Num; l++) {
+		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j + k + l));
+		flapWing(currentFeather, l, layer4Num, flapScale, flapValue);
+	}
+}
+
+function UpdateXScales(framework, scaleAmount) {
+	framework.scene.getObjectByName('feather_group').scale.set(scaleAmount, 1, 1);
+}
+
+function UpdateYScales(framework, scaleAmount) {
+	framework.scene.getObjectByName('feather_group').scale.set(1, scaleAmount, 1);
+}
+
+function UpdateZScales(framework, scaleAmount) {
+	framework.scene.getObjectByName('feather_group').scale.set(1, 1, scaleAmount);
+}
+
+
+
+function updateXRotations(framework, rotAmount) {
+	for(var i = 0; i < numFeathers; i++) {
+		var currentFeather = framework.scene.getObjectByName('feather_group').children[i];
+		updateXRotation(currentFeather, rotAmount);
+	}
+}
+
+function updateYRotations(framework, rotAmount) {
+	for(var i = 0; i < numFeathers; i++) {
+		var currentFeather = framework.scene.getObjectByName('feather_group').children[i];
+		updateYRotation(currentFeather, rotAmount);
+	}
+}
+
+function updateZRotations(framework, rotAmount) {
+	for(var i = 0; i < numFeathers; i++) {
+		var currentFeather = framework.scene.getObjectByName('feather_group').children[i];
+		updateZRotation(currentFeather, rotAmount);
+	}
+}
+
 function updateYPositions(framework, curvatureAmount) {
 	for(var i = 0; i < layer1Num; i++) {
 		var currentFeather = framework.scene.getObjectByName("feather_" + i);
-		//console.log(currentFeather);
 		updateYPosition(currentFeather, i, layer1Num, curvatureAmount);
 	}
 	
@@ -39,7 +108,6 @@ function updateYPositions(framework, curvatureAmount) {
 function updateZPositions(framework, exponent) {
 	for(var i = 0; i < layer1Num; i++) {
 		var currentFeather = framework.scene.getObjectByName("feather_" + i);
-		//console.log(currentFeather);
 		updateZPosition(currentFeather, i, layer1Num, exponent);
 	}
 	
@@ -56,6 +124,13 @@ function updateZPositions(framework, exponent) {
 	for(var l = 0; l < layer4Num; l++) {
 		var currentFeather = framework.scene.getObjectByName("feather_" + (i + j + k + l));
 		updateZPosition(currentFeather, l, layer4Num, exponent);
+	}
+}
+
+function UpdateColor(framework, newColor) {
+	for(var i = 0; i < numFeathers; i++) {
+		var currentFeather = framework.scene.getObjectByName('feather_group').children[i];
+		currentFeather.material.color.set(new THREE.Color(newColor));
 	}
 }
 
@@ -103,13 +178,15 @@ function onLoad(framework) {
     //this one is for all feathers at once
     var curvature = { curvature : 0 }; //have all feathers uniformly scale up their y-axis position, which should be quadratically lerped. first 3 layers default 0 to 0, fourth has a lil offset.
     
-    var x_orientation, y_orientation, z_orientation; //This is per layer. rotate each individual feather by what ever amount
+    var x_orientation = { x_orientation : 0};
+    var y_orientation = { y_orientation : 0};
+    var z_orientation = { z_orientation : 0}; //This is NOT per layer. rotate each individual feather by what ever amount
     
-    var color_red_component, color_green_component, color_blue_component; //Per layer - alter the material color of each feather's material by whatever newVal
+    var x_scale = { x_scale : 1};
+    var y_scale = { y_scale : 1};
+    var z_scale = { z_scale : 1};
     
-    var flappingSpeed; //This goes into the onUpdate function and scale up/down the sin function.
-    
-    var flappingMotion; //Like above. scales up/down the amplitude of the sin function.
+    var wingColor = { value : 0x000000 }; //Per layer - alter the material color of each feather's material by whatever newVal
     
     // load a simple obj mesh
     var objLoader = new THREE.OBJLoader();
@@ -123,30 +200,34 @@ function onLoad(framework) {
         	var featherMesh = new THREE.Mesh(featherGeo, physGold);
         	featherMesh.name = "feather_" + i;
         	layer1(featherMesh, i, layer1Num, 0.5);
-        	scene.add(featherMesh);
+        	//scene.add(featherMesh);
+        	featherGroup.add(featherMesh);
    		}
    		
    		for(var j = 0; j < layer2Num; j++) {
    			var featherMesh = new THREE.Mesh(featherGeo, physGreen);
         	featherMesh.name = "feather_" + (j + i);
         	layer2(featherMesh, j, layer2Num, 0.5);
-        	scene.add(featherMesh);
+        	//scene.add(featherMesh);
+        	featherGroup.add(featherMesh);
    		}
    		
    		for(var k = 0; k < layer3Num; k++) {
    			var featherMesh = new THREE.Mesh(featherGeo, physBlue);
         	featherMesh.name = "feather_" + (k + j + i);
         	layer3(featherMesh, k, layer3Num, 0.5);
-        	scene.add(featherMesh);
+        	//scene.add(featherMesh);
+        	featherGroup.add(featherMesh);
    		}   		
    		
    		for(var l = 0; l < layer4Num; l++) {
    			var featherMesh = new THREE.Mesh(featherGeo, physRed);
         	featherMesh.name = "feather_" + (l + k + j + i);
         	layer4(featherMesh, l, layer4Num, 0.5);
-        	scene.add(featherMesh);
+        	//scene.add(featherMesh);
+        	featherGroup.add(featherMesh);
    		}
-   		
+   		scene.add(featherGroup);
    		numFeathers = i + j + k + l;
     });
     
@@ -170,19 +251,56 @@ function onLoad(framework) {
     gui.add(curvature, 'curvature', 0, 50).onChange(function(newVal) {
         updateYPositions(framework, newVal);
     });
+    
+    gui.add(flappingSpeed, 'flappingSpeedScale', 0.1, 10);
+    gui.add(flappingMotion, 'flappingMotionScale', 0.1, 10);
+    
+    //Can't get these to work with non-integer steps
+    gui.add(x_orientation, 'x_orientation', 0.0, 10.0).step(0.1).listen().onChange(function(newVal) {
+        updateXRotations(framework, newVal);
+    });
+    
+    gui.add(y_orientation, 'y_orientation', 0.0, 10.0).step(0.1).listen().onChange(function(newVal) {
+        updateYRotations(framework, newVal);
+    });
+    
+    gui.add(z_orientation, 'z_orientation', 0.0, 10.0).step(0.1).listen().onChange(function(newVal) {
+        updateZRotations(framework, newVal);
+    });
+    
+    gui.add(windIntensity, 'wind_intensity', 0.01, 20.1);
+    
+    gui.add(x_scale, 'x_scale', 0.5, 10.0).step(0.1).listen().onChange(function(newVal) {
+        UpdateXScales(framework, newVal);
+    });
+    
+    gui.add(y_scale, 'y_scale', 0.5, 10.0).step(0.1).listen().onChange(function(newVal) {
+        UpdateYScales(framework, newVal);
+    });
+    
+    gui.add(z_scale, 'z_scale', 0.5, 10.0).step(0.1).listen().onChange(function(newVal) {
+        UpdateZScales(framework, newVal);
+    });
+    
+    gui.addColor(wingColor, 'value').name('Wing Color').onChange(function(newVal) {
+    	//iterate over all the feathers and add this color
+    	UpdateColor(framework, newVal);
+    });
 }
 
 // called on frame updates
 function onUpdate(framework) {
-	for(var i = 0; i < numFeathers; i++) {
-		var currentFeather = framework.scene.getObjectByName("feather_" + i);
+	//for(var i = 0; i < numFeathers; i++) {
+		var featherGroup = framework.scene.getObjectByName('feather_group');//.children[i];
 		
 		//Flap the feather
-		if (currentFeather !== undefined) {
+		if (featherGroup !== undefined) {
         	var date = new Date();
-        	currentFeather.rotateZ(Math.sin(date.getTime() / 100) * 2 * Math.PI / 180);
+        	//featherGroup.rotateX(flappingMotion.flappingMotionScale* Math.sin(date.getTime() * flappingSpeed.flappingSpeedScale / 100) * 2 * Math.PI / 180);
+        	flapEachFeather(framework, flappingMotion.flappingMotionScale, Math.sin(date.getTime() * flappingSpeed.flappingSpeedScale / 1000));
+        	ApplyWind(framework);
     	}
-	}
+	//}
 }
 
 // when the scene is done initializing, it will call onLoad, then on frame updates, call onUpdate
