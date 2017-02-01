@@ -46,7 +46,7 @@ var guiParameters = {
     featherSize: 1.0, //
     featherOrientation: 0.0, //increase curvature of individual feathers 1 to 10
     flappingSpeed: 1.0, //0 to 10
-    flappingMotion: 1.0 //change orientation of entire wing 0 to 1
+    flappingMotion: 2.7 //change orientation of entire wing 0 to 1
 }
 
 var feather_Material = new THREE.ShaderMaterial({
@@ -329,10 +329,10 @@ function changeGUI(framework)
   {
     guiParameters.flappingSpeed = newVal;
   });
-  // f3.add(guiParameters, 'flappingMotion', 0.0, 1.0).onChange(function(newVal)
-  // {
-  //   guiParameters.flappingMotion = newVal;
-  // });
+  f3.add(guiParameters, 'flappingMotion', 0.0, 10.0).onChange(function(newVal)
+  {
+    guiParameters.flappingMotion = newVal;
+  });
 
   var f4 = gui.addFolder('Wind');
   f4.add(guiParameters, 'windStrength', 0.0, 10.0).onChange(function(newVal)
@@ -548,7 +548,7 @@ function onLoad(framework)
 
    var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
    splineObject = new THREE.Line( splineGeom, material );
-   scene.add(splineObject);
+  //  scene.add(splineObject);
 
     // load a simple obj mesh
     var objLoader = new THREE.OBJLoader();
@@ -583,7 +583,7 @@ function onLoad(framework)
     feathers.rotateX( radianX );
     splineObject.rotateX( radianX );
     scene.add(feathers);
-    scene.add(splineObject);
+    // scene.add(splineObject);
     changeGUI(framework);
 }
 
@@ -610,7 +610,17 @@ function onUpdate(framework)
 
   var y_rotation = Math.sin(date.getTime() / 100) * 2 * Math.PI / 180;
   splineObject.rotateY(guiParameters.flappingSpeed * y_rotation);
-  feathers.rotateY(guiParameters.flappingSpeed * y_rotation);
+  // feathers.rotateY(guiParameters.flappingSpeed * y_rotation);
+
+    var t =Math.sin(date.getTime() / 100);
+    for(var i=0; i<guiParameters.numberOfFeathers ;i++)
+    {
+      if(feathers.children[i])
+      {
+        var position = splineGeom.vertices[i];
+        feathers.children[i].position.set(position.x, position.y ,position.z + t*i*0.01*guiParameters.flappingMotion);
+      }
+    }
 
   feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer1ColorR,
                                                                     guiParameters.Layer1ColorG,
