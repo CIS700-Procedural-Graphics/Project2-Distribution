@@ -32,15 +32,18 @@ var guiParameters = {
     controlPoint2y: 0.0, //increase curvature of spline
     controlPoint3x: 0.0, //increase curvature of spline
     controlPoint3y: 0.0, //increase curvature of spline
-    Layer1ColorR: 0.0902,
-    Layer1ColorG: 0.1961,
-    Layer1ColorB: 0.5411,
-    Layer2ColorR: 0.8471,
-    Layer2ColorG: 0.1647,
-    Layer2ColorB: 0.1647,
-    Layer3ColorR: 0.0667,
-    Layer3ColorG: 0.749,
-    Layer3ColorB: 0.2039,
+    // Layer1ColorR: 0.0902,
+    // Layer1ColorG: 0.1961,
+    // Layer1ColorB: 0.5411,
+    // Layer2ColorR: 0.8471,
+    // Layer2ColorG: 0.1647,
+    // Layer2ColorB: 0.1647,
+    // Layer3ColorR: 0.0667,
+    // Layer3ColorG: 0.749,
+    // Layer3ColorB: 0.2039,
+    Layer1Color: new THREE.Color(0x17328A),// [23,50,138],
+    Layer2Color: [216,42,42],
+    Layer3Color: [17,191,52],
     numberOfFeathers: 50,
     featherDistribution: 1.0, //clumping factor from 0 to 1
     featherSize: 1.0, //
@@ -56,6 +59,7 @@ var feather_Material = new THREE.ShaderMaterial({
     {
         type: "v3",
         value: new THREE.Vector3( 0.0902, 0.1961, 0.5411 )
+        // value: new THREE.Color(0x17328A)
     }
   },
   vertexShader: require('./shaders/feather-vert.glsl'),
@@ -248,47 +252,61 @@ function changeGUI(framework)
   var stats = framework.stats;
 
   var f1 = gui.addFolder('Colors');
-  var f7 = f1.addFolder('Layer1');
-  var f8 = f1.addFolder('Layer2');
-  var f9 = f1.addFolder('Layer3');
-  f7.add(guiParameters, 'Layer1ColorR', 0.0, 1.0).onChange(function(newVal)
+  // var f7 = f1.addFolder('Layer1');
+  // var f8 = f1.addFolder('Layer2');
+  // var f9 = f1.addFolder('Layer3');
+
+  f1.addColor(guiParameters, 'Layer1Color').onChange(function(newVal)
   {
-    guiParameters.Layer1ColorR = newVal;
+    guiParameters.Layer1Color = newVal;
   });
-  f7.add(guiParameters, 'Layer1ColorG', 0.0, 1.0).onChange(function(newVal)
+  f1.addColor(guiParameters, 'Layer2Color').onChange(function(newVal)
   {
-    guiParameters.Layer1ColorG = newVal;
+    guiParameters.Layer2Color = newVal;
   });
-  f7.add(guiParameters, 'Layer1ColorB', 0.0, 1.0).onChange(function(newVal)
+  f1.addColor(guiParameters, 'Layer3Color').onChange(function(newVal)
   {
-    guiParameters.Layer1ColorB = newVal;
+    guiParameters.Layer3Color = newVal;
   });
 
-  f8.add(guiParameters, 'Layer2ColorR', 0.0, 1.0).onChange(function(newVal)
-  {
-    guiParameters.Layer2ColorR = newVal;
-  });
-  f8.add(guiParameters, 'Layer2ColorG', 0.0, 1.0).onChange(function(newVal)
-  {
-    guiParameters.Layer2ColorG = newVal;
-  });
-  f8.add(guiParameters, 'Layer2ColorB', 0.0, 1.0).onChange(function(newVal)
-  {
-    guiParameters.Layer2ColorB = newVal;
-  });
-
-  f9.add(guiParameters, 'Layer3ColorR', 0.0, 1.0).onChange(function(newVal)
-  {
-    guiParameters.Layer3ColorR = newVal;
-  });
-  f9.add(guiParameters, 'Layer3ColorG', 0.0, 1.0).onChange(function(newVal)
-  {
-    guiParameters.Layer3ColorG = newVal;
-  });
-  f9.add(guiParameters, 'Layer3ColorB', 0.0, 1.0).onChange(function(newVal)
-  {
-    guiParameters.Layer3ColorB = newVal;
-  });
+  // f7.add(guiParameters, 'Layer1ColorR', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer1ColorR = newVal;
+  // });
+  // f7.add(guiParameters, 'Layer1ColorG', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer1ColorG = newVal;
+  // });
+  // f7.add(guiParameters, 'Layer1ColorB', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer1ColorB = newVal;
+  // });
+  //
+  // f8.add(guiParameters, 'Layer2ColorR', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer2ColorR = newVal;
+  // });
+  // f8.add(guiParameters, 'Layer2ColorG', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer2ColorG = newVal;
+  // });
+  // f8.add(guiParameters, 'Layer2ColorB', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer2ColorB = newVal;
+  // });
+  //
+  // f9.add(guiParameters, 'Layer3ColorR', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer3ColorR = newVal;
+  // });
+  // f9.add(guiParameters, 'Layer3ColorG', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer3ColorG = newVal;
+  // });
+  // f9.add(guiParameters, 'Layer3ColorB', 0.0, 1.0).onChange(function(newVal)
+  // {
+  //   guiParameters.Layer3ColorB = newVal;
+  // });
 
   var f2 = gui.addFolder('Feathers');
   f2.add(guiParameters, 'featherDistribution', 0.0, 1.0).onChange(function(newVal)
@@ -622,15 +640,26 @@ function onUpdate(framework)
       }
     }
 
-  feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer1ColorR,
-                                                                    guiParameters.Layer1ColorG,
-                                                                    guiParameters.Layer1ColorB );
-  feather_Material2.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer2ColorR,
-                                                                    guiParameters.Layer2ColorG,
-                                                                    guiParameters.Layer2ColorB );
-  feather_Material3.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer3ColorR,
-                                                                    guiParameters.Layer3ColorG,
-                                                                    guiParameters.Layer3ColorB );
+    // feather_Material.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer1ColorR,
+    //                                                                   guiParameters.Layer1ColorG,
+    //                                                                   guiParameters.Layer1ColorB);
+    // feather_Material2.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer2ColorR,
+    //                                                                    guiParameters.Layer2ColorG,
+    //                                                                    guiParameters.Layer2ColorB);
+    // feather_Material3.uniforms.feathercolor.value = new THREE.Vector3( guiParameters.Layer3ColorR,
+    //                                                                    guiParameters.Layer3ColorG,
+    //                                                                    guiParameters.Layer3ColorB);
+
+
+  feather_Material.uniforms.feathercolor.value = [guiParameters.Layer1Color.r/255,
+                                                  guiParameters.Layer1Color.g/255,
+                                                  guiParameters.Layer1Color.b/255];
+  feather_Material2.uniforms.feathercolor.value = [guiParameters.Layer2Color.r/255,
+                                                   guiParameters.Layer2Color.g/255,
+                                                   guiParameters.Layer2Color.b/255];
+  feather_Material3.uniforms.feathercolor.value = [guiParameters.Layer3Color.r/255,
+                                                   guiParameters.Layer3Color.g/255,
+                                                   guiParameters.Layer3Color.b/255];
 }
 
 // when the scene is done initializing, it will call onLoad, then on frame updates, call onUpdate
