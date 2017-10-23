@@ -54,7 +54,13 @@ function onLoad(framework) {
     // load a simple obj mesh
     var objLoader = new THREE.OBJLoader();
 
-    objLoader.load('https://raw.githubusercontent.com/CIS700-Procedural-Graphics/Avian/master/geo/robothead2.obj', function(obj) {
+    var headGeo;
+    var headMesh;
+
+    objLoader.load('https://raw.githubusercontent.com/emily-vo/Avian/master/geo/parrot.obj', function(obj) {
+        featherGeo = obj.children[0].geometry;
+        headMesh = new THREE.Mesh(headGeo, lambertWhite);
+        scene.add(headMesh);
     });
     function repaint() {
         // Set light
@@ -74,7 +80,7 @@ function onLoad(framework) {
         feathers = [];
         var curve = new THREE.QuadraticBezierCurve3();
 
-        objLoader.load('https://raw.githubusercontent.com/CIS700-Procedural-Graphics/Avian/master/geo/feather.obj', function(obj) {
+        objLoader.load('https://raw.githubusercontent.com/emily-vo/Avian/master/geo/feather.obj', function(obj) {
             // Add a simple curve
             var SUBDIVISIONS = guiVar.subdivisions;
             var SUBDIVMULT = guiVar.subdivisionsMult;
