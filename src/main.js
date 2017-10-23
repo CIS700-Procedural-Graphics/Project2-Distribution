@@ -54,7 +54,8 @@ function onLoad(framework) {
     // load a simple obj mesh
     var objLoader = new THREE.OBJLoader();
 
-
+    objLoader.load('https://raw.githubusercontent.com/CIS700-Procedural-Graphics/Avian/master/geo/robothead2.obj', function(obj) {
+    });
     function repaint() {
         // Set light
         // remove all scene children
@@ -69,14 +70,11 @@ function onLoad(framework) {
         directionalLight.position.set(1, 3, 2);
         directionalLight.position.multiplyScalar(10);
 
-        
-
-
         materials = [];
         feathers = [];
         var curve = new THREE.QuadraticBezierCurve3();
 
-        objLoader.load('https://raw.githubusercontent.com/CIS700-Procedural-Graphics/Project2-Toolbox-Functions/master/geo/feather.obj', function(obj) {
+        objLoader.load('https://raw.githubusercontent.com/CIS700-Procedural-Graphics/Avian/master/geo/feather.obj', function(obj) {
             // Add a simple curve
             var SUBDIVISIONS = guiVar.subdivisions;
             var SUBDIVMULT = guiVar.subdivisionsMult;
